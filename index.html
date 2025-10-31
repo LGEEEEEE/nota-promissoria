@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,87 +8,174 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
+
     <style>
         /* --- Estilos base (adaptados do termo.html) --- */
-        body { 
-            font-family: Arial, sans-serif; 
-            background-color: #f0f2f5; 
-            display: flex; 
-            align-items: flex-start; 
-            justify-content: center; 
-            gap: 30px; 
-            padding: 20px; 
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 30px;
+            padding: 20px;
             font-size: 14px;
             flex-wrap: wrap;
         }
-        #form-container { 
-            flex: 0 0 450px; 
-            background: #ffffff; 
-            padding: 25px; 
-            border-radius: 8px; 
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); 
-            position: sticky; 
-            top: 20px; 
-            max-height: 95vh; 
-            overflow-y: auto; 
+
+        #form-container {
+            flex: 0 0 450px;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 20px;
+            max-height: 95vh;
+            overflow-y: auto;
         }
-        #form-container h1 { text-align: center; margin-top: 0; margin-bottom: 25px; font-size: 1.5rem; color: #333; }
-        .form-section { margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
-        .form-section:last-of-type { border-bottom: none; padding-bottom: 0; }
-        .form-section h2 { font-size: 1.1rem; color: #333; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; color: #555; }
-        .form-group input[type="text"], .form-group input[type="date"], .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        #gerar-pdf { display: block; width: 100%; padding: 12px; color: white; border: none; border-radius: 4px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background-color 0.3s ease; background-color: #007bff; }
-        #gerar-pdf:hover:not(:disabled) { background-color: #0056b3; }
-        #gerar-pdf:disabled { background-color: #aaa; cursor: not-allowed; }
+
+        #form-container h1 {
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        .form-section {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+
+        .form-section:last-of-type {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .form-section h2 {
+            font-size: 1.1rem;
+            color: #333;
+            margin-top: 0;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="date"],
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        #gerar-pdf {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            background-color: #007bff;
+        }
+
+        #gerar-pdf:hover:not(:disabled) {
+            background-color: #0056b3;
+        }
+
+        #gerar-pdf:disabled {
+            background-color: #aaa;
+            cursor: not-allowed;
+        }
 
         /* --- Estilos do Preview da Nota Promissória --- */
-        #preview-container { 
-            flex: 1; 
-            display: flex; 
+        #preview-container {
+            flex: 1;
+            display: flex;
             justify-content: center;
-            min-width: 210mm; /* Largura A4 */
+            min-width: 210mm;
+            /* Largura A4 */
         }
-        
+
         #nota-promissoria {
-            width: 210mm; /* Largura A4 */
-            min-height: 110mm; /* <<< CORREÇÃO: Altura mínima */
+            width: 210mm;
+            /* Largura A4 */
+            min-height: 110mm;
+            /* <<< CORREÇÃO: Altura mínima */
             padding: 20mm;
-            background: #ffffff; 
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
-            box-sizing: border-box; 
-            font-family: 'Times New Roman', Times, serif; 
+            background: #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+            font-family: 'Times New Roman', Times, serif;
             color: #000;
             font-size: 12pt;
             border: 2px solid #000;
-            text-transform: uppercase; /* A maioria do texto é maiúscula */
+            text-transform: uppercase;
+            /* A maioria do texto é maiúscula */
         }
 
-        .variavel { font-weight: bold; color: #0d47a1; transition: color 0.3s ease; }
-        .generating-pdf .variavel { color: #000; font-weight: normal; } /* Estilo para impressão */
-        
+        .variavel {
+            font-weight: bold;
+            color: #0d47a1;
+            transition: color 0.3s ease;
+        }
+
+        .generating-pdf .variavel {
+            color: #000;
+            font-weight: normal;
+        }
+
+        /* Estilo para impressão */
+
         .np-header {
             display: flex;
             justify-content: space-between;
             border-bottom: 2px solid #000;
             padding-bottom: 10px;
         }
+
         .np-header-left {
             font-size: 1.5rem;
             font-weight: bold;
         }
+
         .np-header-right {
             border: 1px solid #000;
             padding: 5px;
             text-align: center;
         }
+
         .np-header-right div:first-child {
             border-bottom: 1px solid #000;
             padding: 0 10px 5px 10px;
         }
+
         .np-header-right div:last-child {
             padding: 5px 10px 0 10px;
             min-width: 150px;
@@ -97,16 +185,17 @@
             margin-top: 20px;
             line-height: 1.6;
         }
-        
+
         .np-local-pagamento {
             margin-top: 20px;
         }
-        
+
         .np-emitente {
             margin-top: 30px;
             border-top: 1px solid #000;
             padding-top: 10px;
         }
+
         .np-emitente strong {
             display: inline-block;
             width: 120px;
@@ -130,30 +219,78 @@
         }
 
         /* Toast (Notificações) */
-        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 1090; }
-        .toast { width: 350px; max-width: 90%; background-color: #333; color: white; padding: 15px; border-radius: 5px; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); opacity: 0; transition: opacity 0.3s, transform 0.3s; transform: translateX(100%); }
-        .toast.show { opacity: 1; transform: translateX(0); }
-        .toast.bg-success { background-color: #198754; } 
-        .toast.bg-danger { background-color: #dc3545; }
-
-        /* Estilos de Geração de PDF (do termo.html) */
-        @media print, (min-width: 0px) {
-            .jsPDF-native-generating { display: block; background-color: #fff; padding: 0; margin: 0; }
-            .jsPDF-native-generating #form-container,
-            .jsPDF-native-generating #toast-container { display: none; }
-            .jsPDF-native-generating #preview-container { flex: none; justify-content: flex-start; margin: 0; padding: 0; }
-            .jsPDF-native-generating #nota-promissoria { box-shadow: none; margin: 0; border: none; }
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1090;
         }
 
+        .toast {
+            width: 350px;
+            max-width: 90%;
+            background-color: #333;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            transform: translateX(100%);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .toast.bg-success {
+            background-color: #198754;
+        }
+
+        .toast.bg-danger {
+            background-color: #dc3545;
+        }
+
+        /* Estilos de Geração de PDF (do termo.html) */
+        @media print,
+        (min-width: 0px) {
+            .jsPDF-native-generating {
+                display: block;
+                background-color: #fff;
+                padding: 0;
+                margin: 0;
+            }
+
+            .jsPDF-native-generating #form-container,
+            .jsPDF-native-generating #toast-container {
+                display: none;
+            }
+
+            .jsPDF-native-generating #preview-container {
+                flex: none;
+                justify-content: flex-start;
+                margin: 0;
+                padding: 0;
+            }
+
+            .jsPDF-native-generating #nota-promissoria {
+                box-shadow: none;
+                margin: 0;
+                border: none;
+            }
+        }
     </style>
 </head>
+
 <body>
-    
+
     <div class="toast-container" id="toast-container"></div>
 
     <div id="form-container">
         <h1>Gerar Nota Promissória</h1>
-        
+
         <div class="form-section">
             <h2>Dados do Emitente (Devedor)</h2>
             <div class="form-group">
@@ -220,7 +357,7 @@
 
     <div id="preview-container">
         <div id="nota-promissoria">
-            
+
             <div class="np-header">
                 <div class="np-header-left">
                     NOTA PROMISSÓRIA
@@ -232,12 +369,12 @@
             </div>
 
             <div class="np-body">
-                Até o dia <span id="doc-vencimento-extenso" class="variavel">[Vencimento por Extenso]</span> 
-                pagarei por esta única via de NOTA PROMISSÓRIA à 
-                <span id="doc-credor-nome" class="variavel">POLLO CONSULTORA DE SEGUROS LTDA</span> 
-                CNPJ <span id="doc-credor-cnpj" class="variavel">44.906.703/0001-59</span> 
-                ou à sua ordem a quantia de 
-                <span id="doc-valor-extenso" class="variavel">[Valor por Extenso]</span> 
+                Até o dia <span id="doc-vencimento-extenso" class="variavel">[Vencimento por Extenso]</span>
+                pagarei por esta única via de NOTA PROMISSÓRIA à
+                <span id="doc-credor-nome" class="variavel">POLLO CONSULTORA DE SEGUROS LTDA</span>
+                CNPJ <span id="doc-credor-cnpj" class="variavel">44.906.703/0001-59</span>
+                ou à sua ordem a quantia de
+                <span id="doc-valor-extenso" class="variavel">[Valor por Extenso]</span>
                 em moeda corrente desse país.
             </div>
 
@@ -246,9 +383,11 @@
             </div>
 
             <div class="np-emitente">
-                <div><strong>Nome do Emitente:</strong> <span id="doc-emitente-nome" class="variavel">[Nome Emitente]</span></div>
+                <div><strong>Nome do Emitente:</strong> <span id="doc-emitente-nome" class="variavel">[Nome
+                        Emitente]</span></div>
                 <div><strong>CPF nº:</strong> <span id="doc-emitente-cpf" class="variavel">[CPF Emitente]</span></div>
-                <div><strong>Endereço:</strong> <span id="doc-emitente-endereco" class="variavel">[Endereço Emitente]</span></div>
+                <div><strong>Endereço:</strong> <span id="doc-emitente-endereco" class="variavel">[Endereço
+                        Emitente]</span></div>
             </div>
 
             <div style="margin-top: 40px; border-bottom: 1px solid #000; width: 60%;">
@@ -259,8 +398,8 @@
                 Data da Emissão: <span id="doc-data-emissao" class="variavel">[Data Emissão]</span>
             </div>
 
-        </div> 
-    </div> 
+        </div>
+    </div>
 
 
     <script>
@@ -270,14 +409,14 @@
         // --- FUNÇÕES UTILITÁRIAS (do termo.html) ---
         const formatarMoeda = (v) => { if (typeof v === 'string') { if (v.startsWith('R$')) return v; v = moedaParaFloat(v); } return (v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }); };
         const moedaParaFloat = (v) => { return parseFloat(String(v || '').replace('R$', '').trim().replace(/\./g, "").replace(",", ".")) || 0; };
-        
+
         // Toast (Notificações)
         const showToast = (message, type = 'success') => {
             const toastContainer = document.getElementById('toast-container');
             const toastId = 'toast-' + Date.now();
             let bgClass = 'bg-success';
             if (type === 'danger') bgClass = 'bg-danger';
-            
+
             const toastEl = document.createElement('div');
             toastEl.id = toastId;
             toastEl.className = `toast ${bgClass}`;
@@ -298,14 +437,14 @@
          */
         function dataParaExtenso(dataString) {
             if (!dataString) return "";
-            
+
             const meses = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"];
-            
+
             let dataObj;
             if (dataString.includes('-')) { // Formato AAAA-MM-DD
                 const parts = dataString.split('-');
                 dataObj = new Date(parts[0], parts[1] - 1, parts[2]);
-            } else if (dataString.includes('/')) { // Formato DD/MM/AAAA
+            } else if (dataString.includes('/')) { // Formato DD/MM-AAAA
                 const parts = dataString.split('/');
                 dataObj = new Date(parts[2], parts[1] - 1, parts[0]);
             } else {
@@ -314,7 +453,7 @@
 
             // Adiciona verificação de data inválida (ex: 31/02)
             if (isNaN(dataObj.getDate())) return "";
-            
+
             // Corrige o fuso horário (common JS bug)
             dataObj.setMinutes(dataObj.getMinutes() + dataObj.getTimezoneOffset());
 
@@ -322,9 +461,15 @@
             const mesNome = meses[dataObj.getMonth()];
             const ano = dataObj.getFullYear();
 
-            // Usamos a mesma lógica de 'numeroPorExtenso' para dia e ano
-            const diaExtenso = numeroPorExtenso(dia).split(' ')[0]; // Pega só o primeiro nome (ex: "VINTE")
-            const anoExtenso = numeroPorExtenso(ano);
+            // --- CORREÇÃO ESTÁ AQUI ---
+            // A função numeroPorExtenso() retorna "... REAIS". Precisamos remover isso.
+
+            // Trata o dia 1 de forma especial e remove " REAIS"
+            const diaExtenso = (dia === 1) ? "UM" : numeroPorExtenso(dia).split(' REAIS')[0];
+
+            // Remove " REAIS" do ano
+            const anoExtenso = numeroPorExtenso(ano).split(' REAIS')[0];
+            // --- FIM DA CORREÇÃO ---
 
             return `${diaExtenso} de ${mesNome} de ${anoExtenso}`.toUpperCase();
         }
@@ -343,7 +488,7 @@
             let [inteiro, centavos] = parseFloat(numero).toFixed(2).split('.');
             inteiro = parseInt(inteiro, 10);
             centavos = parseInt(centavos, 10);
-            
+
             const unidades = ["", "UM", "DOIS", "TRÊS", "QUATRO", "CINCO", "SEIS", "SETE", "OITO", "NOVE"];
             const especiais = ["DEZ", "ONZE", "DOZE", "TREZE", "QUATORZE", "QUINZE", "DEZESSEIS", "DEZESSETE", "DEZOITO", "DEZENOVE"];
             const dezenas = ["", "DEZ", "VINTE", "TRINTA", "QUARENTA", "CINQUENTA", "SESSENTA", "SETENTA", "OITENTA", "NOVENTA"];
@@ -353,12 +498,12 @@
             function converterGrupo(n) {
                 if (n === 0) return "";
                 if (n === 100) return "CEM";
-                
+
                 let str = "";
                 let c = Math.floor(n / 100);
                 let d = Math.floor((n % 100) / 10);
                 let u = n % 10;
-                
+
                 if (c > 0) str += centenas[c] + (d > 0 || u > 0 ? " E " : "");
                 if (d === 1 && u > 0) {
                     str += especiais[u];
@@ -430,7 +575,7 @@
             const valorFloat = moedaParaFloat(valorInput.value);
             const valorFormatado = formatarMoeda(valorFloat);
             const valorExtenso = numeroPorExtenso(valorFloat);
-            
+
             document.getElementById('doc-valor-formatado').textContent = valorFormatado;
             document.getElementById('doc-valor-extenso').textContent = valorExtenso || '[Valor por Extenso]';
             document.getElementById('valor-extenso-feedback').textContent = valorExtenso;
@@ -444,7 +589,7 @@
                 const [a, m, d] = dataAAAA.split('-');
                 return `${d}/${m}/${a}`;
             };
-            
+
             const dataVencFormatada = formatarDataBR(vencimentoInput);
             const dataVencExtenso = dataParaExtenso(vencimentoInput);
             const dataEmissaoFormatada = formatarDataBR(emissaoInput);
@@ -463,38 +608,38 @@
 
             const nomePessoa = document.getElementById('emitente-nome').value || 'nota_promissoria';
             const filename = `${nomePessoa.trim().replace(/\s+/g, '_')}_NP.pdf`;
-            
+
             const documento = document.getElementById('nota-promissoria');
-            
+
             document.body.classList.add('jsPDF-native-generating');
             documento.classList.add('generating-pdf'); // Prepara para impressão
 
             try {
                 // --- CORREÇÃO 1: Mudar para Retrato ('p') ---
                 const pdf = new jsPDF('p', 'mm', 'a4'); // 'p' = portrait
-                
+
                 // --- CORREÇÃO 2: Ajustar margens para A4 retrato ---
                 // O CSS da nota (#nota-promissoria) já tem 210mm de largura (largura total do A4)
                 // e 20mm de 'padding' (que age como as margens internas).
                 // Portanto, podemos renderizar o elemento começando em x=0, y=0.
-                
+
                 const docWidth = pdf.internal.pageSize.getWidth(); // 210mm
 
                 await pdf.html(documento, {
-                    callback: function(doc) {
+                    callback: function (doc) {
                         doc.save(filename);
                         showToast("PDF gerado com sucesso!");
                     },
                     x: 0, // O padding do CSS já define a margem
                     y: 0, // O padding do CSS já define a margem
-                    autoPaging: 'text', 
+                    autoPaging: 'text',
                     width: docWidth, // Força a largura para 210mm
                     windowWidth: documento.scrollWidth
                 });
 
             } catch (error) {
                 console.error("Erro ao gerar PDF:", error);
-                showToast("Ocorreu um erro ao gerar o PDF.", "danger"); 
+                showToast("Ocorreu um erro ao gerar o PDF.", "danger");
             } finally {
                 document.body.classList.remove('jsPDF-native-generating');
                 documento.classList.remove('generating-pdf');
@@ -506,35 +651,35 @@
 
         // --- INICIALIZAÇÃO E EVENT LISTENERS ---
         document.addEventListener('DOMContentLoaded', () => {
-            
+
             // --- NOVO: Define a data de emissão como hoje ---
             const hoje = new Date();
             const ano = hoje.getFullYear();
             const mes = String(hoje.getMonth() + 1).padStart(2, '0'); // Adiciona +1 (meses 0-11) e formata
             const dia = String(hoje.getDate()).padStart(2, '0'); // Formata o dia
             const dataAtualFormatada = `${ano}-${mes}-${dia}`; // Formato AAAA-MM-DD
-            
+
             document.getElementById('data-emissao').value = dataAtualFormatada;
             // ------------------------------------------------
-            
+
             // Listeners do formulário
             document.querySelectorAll('#form-container input').forEach(input => {
                 input.addEventListener('input', atualizarPreview);
                 // Força maiúsculas ao sair do campo
-                if(input.type === 'text') {
+                if (input.type === 'text') {
                     input.addEventListener('blur', () => { input.value = input.value.toUpperCase(); atualizarPreview(); });
                 }
             });
 
             // Listener específico para moeda
             document.querySelectorAll('.campo-moeda').forEach(input => {
-                input.addEventListener('blur', function() { 
-                    if (this.value.trim() !== "") { 
-                        const valorNumerico = moedaParaFloat(this.value); 
+                input.addEventListener('blur', function () {
+                    if (this.value.trim() !== "") {
+                        const valorNumerico = moedaParaFloat(this.value);
                         // Corrigido para formatar como string simples, não moeda (ex: 114.500,00)
                         this.value = valorNumerico.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/[^0-9,]/g, (match) => match === ',' ? ',' : '');
-                        atualizarPreview(); 
-                    } 
+                        atualizarPreview();
+                    }
                 });
             });
 
@@ -546,11 +691,12 @@
             document.getElementById('emitente-cpf').placeholder = "121.290.381-15";
             document.getElementById('emitente-endereco').placeholder = "QS6 CONJ 2 casa 42 Bairro: RIACHO FUNDO I";
             document.getElementById('valor-numerico').placeholder = "114.500,00";
-            
+
             // Simula o preenchimento inicial para os campos com 'value' e a nova data
             atualizarPreview();
         });
     </script>
 
 </body>
+
 </html>
