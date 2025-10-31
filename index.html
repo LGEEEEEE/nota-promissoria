@@ -191,7 +191,7 @@
                 </div>
                 <div class="form-group">
                     <label for="data-vencimento">Data de Vencimento:</label>
-                    <input type="date" id="data-vencimento" value="2025-07-18">
+                    <input type="date" id="data-vencimento">
                 </div>
             </div>
             <div class="form-group">
@@ -210,7 +210,7 @@
                 </div>
                 <div class="form-group">
                     <label for="data-emissao">Data de Emissão:</label>
-                    <input type="date" id="data-emissao" value="2025-06-27">
+                    <input type="date" id="data-emissao">
                 </div>
             </div>
         </div>
@@ -314,6 +314,9 @@
 
             // Adiciona verificação de data inválida (ex: 31/02)
             if (isNaN(dataObj.getDate())) return "";
+            
+            // Corrige o fuso horário (common JS bug)
+            dataObj.setMinutes(dataObj.getMinutes() + dataObj.getTimezoneOffset());
 
             const dia = dataObj.getDate();
             const mesNome = meses[dataObj.getMonth()];
@@ -418,7 +421,7 @@
                 const valor = document.getElementById(formId).value.toUpperCase(); // Força maiúsculas
                 camposTexto[formId].forEach(docId => {
                     const el = document.getElementById(docId);
-                    if (el) el.textContent = valor || `[${el.id}]`; // Placeholder
+                    if (el) el.textContent = valor || `[${el.id.replace('doc-', '')}]`; // Placeholder melhorado
                 });
             }
 
@@ -503,8 +506,16 @@
 
         // --- INICIALIZAÇÃO E EVENT LISTENERS ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Inicializa o preview
-            atualizarPreview();
+            
+            // --- NOVO: Define a data de emissão como hoje ---
+            const hoje = new Date();
+            const ano = hoje.getFullYear();
+            const mes = String(hoje.getMonth() + 1).padStart(2, '0'); // Adiciona +1 (meses 0-11) e formata
+            const dia = String(hoje.getDate()).padStart(2, '0'); // Formata o dia
+            const dataAtualFormatada = `${ano}-${mes}-${dia}`; // Formato AAAA-MM-DD
+            
+            document.getElementById('data-emissao').value = dataAtualFormatada;
+            // ------------------------------------------------
             
             // Listeners do formulário
             document.querySelectorAll('#form-container input').forEach(input => {
@@ -520,7 +531,8 @@
                 input.addEventListener('blur', function() { 
                     if (this.value.trim() !== "") { 
                         const valorNumerico = moedaParaFloat(this.value); 
-                        this.value = valorNumerico.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\./g, ''); 
+                        // Corrigido para formatar como string simples, não moeda (ex: 114.500,00)
+                        this.value = valorNumerico.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/[^0-9,]/g, (match) => match === ',' ? ',' : '');
                         atualizarPreview(); 
                     } 
                 });
@@ -535,7 +547,7 @@
             document.getElementById('emitente-endereco').placeholder = "QS6 CONJ 2 casa 42 Bairro: RIACHO FUNDO I";
             document.getElementById('valor-numerico').placeholder = "114.500,00";
             
-            // Simula o preenchimento inicial para os campos com 'value'
+            // Simula o preenchimento inicial para os campos com 'value' e a nova data
             atualizarPreview();
         });
     </script>
