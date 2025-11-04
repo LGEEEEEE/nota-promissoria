@@ -311,7 +311,7 @@
             <h2>Dados do Credor (Empresa)</h2>
             <div class="form-group">
                 <label for="credor-nome">Nome do Credor (ou à sua ordem):</label>
-                <input type="text" id="credor-nome" value="POLLO CONSULTORA DE SEGUROS LTDA">
+                <input type="text" id="credor-nome" value="POLLO PROMOTORA LTDA">
             </div>
             <div class="form-group">
                 <label for="credor-cnpj">CNPJ do Credor:</label>
@@ -375,7 +375,7 @@
                 CNPJ <span id="doc-credor-cnpj" class="variavel">44.906.703/0001-59</span>
                 ou à sua ordem a quantia de
                 <span id="doc-valor-extenso" class="variavel">[Valor por Extenso]</span>
-                em moeda corrente desse país.
+                &nbsp;em moeda corrente desse país.
             </div>
 
             <div class="np-local-pagamento">
@@ -390,7 +390,7 @@
                         Emitente]</span></div>
             </div>
 
-            <div style="margin-top: 40px; border-bottom: 1px solid #000; width: 60%;">
+            <div style="margin-top: 40px; border-top: 1px solid #000; width: 60%;">
                 <strong>Assinatura do Emitente</strong>
             </div>
 
@@ -435,6 +435,10 @@
          * Converte uma string de data (YYYY-MM-DD ou DD/MM/YYYY) para extenso.
          * Ex: '2025-07-18' -> 'DEZOITO de JULHO de DOIS MIL E VINTE E CINCO'
          */
+        /**
+         * Converte uma string de data (YYYY-MM-DD ou DD/MM/YYYY) para extenso.
+         * Ex: '2025-07-18' -> 'DEZOITO de JULHO de DOIS MIL E VINTE E CINCO'
+         */
         function dataParaExtenso(dataString) {
             if (!dataString) return "";
 
@@ -451,24 +455,20 @@
                 return ""; // Formato inválido
             }
 
-            // Adiciona verificação de data inválida (ex: 31/02)
             if (isNaN(dataObj.getDate())) return "";
-
-            // Corrige o fuso horário (common JS bug)
             dataObj.setMinutes(dataObj.getMinutes() + dataObj.getTimezoneOffset());
 
             const dia = dataObj.getDate();
             const mesNome = meses[dataObj.getMonth()];
             const ano = dataObj.getFullYear();
 
-            // --- CORREÇÃO ESTÁ AQUI ---
-            // A função numeroPorExtenso() retorna "... REAIS". Precisamos remover isso.
+            // --- CORREÇÃO APLICADA AQUI ---
+            // Definimos um objeto de opções para dizer à função que NÃO queremos formato de moeda
+            const opts = { currency: false };
 
-            // Trata o dia 1 de forma especial e remove " REAIS"
-            const diaExtenso = (dia === 1) ? "UM" : numeroPorExtenso(dia).split(' REAIS')[0];
-
-            // Remove " REAIS" do ano
-            const anoExtenso = numeroPorExtenso(ano).split(' REAIS')[0];
+            // Trata o dia 1 de forma especial
+            const diaExtenso = (dia === 1) ? "UM" : numeroPorExtenso(dia, opts);
+            const anoExtenso = numeroPorExtenso(ano, opts);
             // --- FIM DA CORREÇÃO ---
 
             return `${diaExtenso} de ${mesNome} de ${anoExtenso}`.toUpperCase();
@@ -478,9 +478,13 @@
          * Converte um número (float ou string) para extenso em Reais.
          * Ex: 114500.00 -> 'CENTO E QUATORZE MIL E QUINHENTOS REAIS'
          */
-        function numeroPorExtenso(numero) {
-            // Lógica de conversão de número para extenso (simplificada)
-            // Esta é uma função complexa. Foi embutida aqui para não depender de libs externas.
+        function numeroPorExtenso(numero, options = {}) {
+            // Define as opções padrão
+            const settings = {
+                currency: true, // Por padrão, formata como moeda
+                ...options
+            };
+
             numero = typeof numero === 'number' ? numero.toString() : numero.toString().replace(/[^\d,.-]/g, '');
             numero = numero.replace(',', '.');
             if (isNaN(parseFloat(numero))) return "";
@@ -514,9 +518,15 @@
                 return str;
             }
 
+            // Lógica para R$ 0,xx ou apenas 0
             if (inteiro === 0) {
-                if (centavos > 0) return converterGrupo(centavos) + " CENTAVOS";
-                return "ZERO REAIS";
+                if (settings.currency) {
+                    // --- CORREÇÃO DO BUG "GRUDADO" ESTÁ AQUI ---
+                    // Adicionado espaço antes de "CENTAVOS"
+                    if (centavos > 0) return converterGrupo(centavos) + " CENTAVOS";
+                    return "ZERO REAIS";
+                }
+                return "ZERO"; // Se não for moeda
             }
 
             let grupos = [];
@@ -540,10 +550,13 @@
             }
 
             let resultado = extenso.join(" E ").replace(/\s+E\s+$/, '').trim();
-            resultado += (inteiro === 1 ? " REAL" : " REAIS");
 
-            if (centavos > 0) {
-                resultado += " E " + converterGrupo(centavos) + " CENTAVOS";
+            // Adiciona a parte da moeda (REAIS/CENTAVOS) apenas se a opção estiver ligada
+            if (settings.currency) {
+                resultado += (inteiro === 1 ? " REAL" : " REAIS");
+                if (centavos > 0) {
+                    resultado += " E " + converterGrupo(centavos) + " CENTAVOS";
+                }
             }
 
             return resultado.toUpperCase().replace(/\s+/g, ' ');
